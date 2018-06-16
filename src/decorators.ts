@@ -8,7 +8,7 @@ import {ClassTransformOptions} from "class-transformer";
 import {MiddlewareMetadataArgs} from "./metadata/args/MiddlewareMetadataArgs";
 import {ResultMetadataArgs} from "./metadata/args/ResultMetadataArgs";
 import {ResultTypes} from "./metadata/types/ResultTypes";
-import {ObjectType} from './util/ObjectType';
+import {ObjectType} from "./util/ObjectType";
 
 /**
  * Registers a class to be a socket controller that can listen to websocket events and respond to them.
@@ -28,10 +28,12 @@ export function SocketController(namespace?: string) {
 /**
  * Registers controller's action to be executed when socket receives message with given name.
  */
+export {OnMessage as On};
+
 export function OnMessage(name?: string): Function {
     return function (object: Object, methodName: string) {
         const metadata: ActionMetadataArgs = {
-            name: name,
+            name: name || methodName,
             target: object.constructor,
             method: methodName,
             type: ActionTypes.MESSAGE
@@ -71,6 +73,8 @@ export function OnDisconnect(): Function {
 /**
  * Injects connected client's socket object to the controller action.
  */
+export {ConnectedSocket as Sock};
+
 export function ConnectedSocket() {
     return function (object: Object, methodName: string, index: number) {
         let format = (Reflect as any).getMetadata("design:paramtypes", object, methodName)[index];
@@ -88,6 +92,8 @@ export function ConnectedSocket() {
 /**
  * Injects socket.io object that initialized a connection.
  */
+export {SocketIO as Serv};
+
 export function SocketIO() {
     return function (object: Object, methodName: string, index: number) {
         let format = (Reflect as any).getMetadata("design:paramtypes", object, methodName)[index];
@@ -105,6 +111,8 @@ export function SocketIO() {
 /**
  * Injects received message body.
  */
+export {MessageBody as Msg};
+
 export function MessageBody(options?: { classTransformOptions?: ClassTransformOptions }) {
     return function (object: Object, methodName: string, index: number) {
         let format = (Reflect as any).getMetadata("design:paramtypes", object, methodName)[index];
@@ -123,6 +131,8 @@ export function MessageBody(options?: { classTransformOptions?: ClassTransformOp
 /**
  * Injects query parameter from the received socket request.
  */
+export {SocketQueryParam as Query};
+
 export function SocketQueryParam(name?: string) {
     return function (object: Object, methodName: string, index: number) {
         let format = (Reflect as any).getMetadata("design:paramtypes", object, methodName)[index];
@@ -240,7 +250,7 @@ export function EmitOnFail(messageName: string, options?: { classTransformOption
 
 export function EmitOnFailFor<T extends Error>(messageName: string, errorType: (type?: any) => ObjectType<T>, options?: { classTransformOptions?: ClassTransformOptions }): Function {
     return function (object: Object, methodName: string) {
-        const metadata: ResultMetadataArgs = {    
+        const metadata: ResultMetadataArgs = {
             target: object.constructor,
             method: methodName,
             type: ResultTypes.EMIT_ON_FAIL_FOR,
@@ -248,7 +258,7 @@ export function EmitOnFailFor<T extends Error>(messageName: string, errorType: (
             errorType: errorType,
             classTransformOptions: options && options.classTransformOptions ? options.classTransformOptions : undefined
         };
-        
+
         defaultMetadataArgsStorage().results.push(metadata);
     }
 }
