@@ -14,7 +14,7 @@ export interface ActionMetadataArgs {
      * Class on which's method this action is attached.
      */
     target: Function;
-    
+
     /**
      * Object's method that will be executed on this action.
      */
@@ -24,5 +24,9 @@ export interface ActionMetadataArgs {
      * Action type.
      */
     type: ActionType;
-    
+
+    /**
+     * Action in which it will be triggered.
+     */
+    after?: string;
 }

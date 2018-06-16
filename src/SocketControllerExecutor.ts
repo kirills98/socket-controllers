@@ -1,3 +1,4 @@
+import {Socket} from "socket.io";
 import {MetadataBuilder} from "./metadata-builder/MetadataBuilder";
 import {ActionMetadata} from "./metadata/ActionMetadata";
 import {ClassTransformOptions, plainToClass, classToPlain} from "class-transformer";
@@ -99,32 +100,41 @@ export class SocketControllerExecutor {
 
     private handleConnection(controllers: ControllerMetadata[], socket: any) {
         controllers.forEach(controller => {
-            controller.actions.forEach(action => {
+            controller.rootActions.forEach(action => {
                 if (action.type === ActionTypes.CONNECT) {
-                    this.handleAction(action, { socket: socket })
+                    this.handleAction(action, {socket: socket})
                         .then(result => this.handleSuccessResult(result, action, socket, null))
                         .catch(error => this.handleFailResult(error, action, socket));
 
                 } else if (action.type === ActionTypes.DISCONNECT) {
                     socket.on("disconnect", () => {
-                        this.handleAction(action, { socket: socket })
+                        this.handleAction(action, {socket: socket})
                             .then(result => this.handleSuccessResult(result, action, socket, null))
                             .catch(error => this.handleFailResult(error, action, socket));
                     });
 
                 } else if (action.type === ActionTypes.MESSAGE) {
-                    socket.on(action.name, (data: any, fn: Function) => {
-                        this.handleAction(action, { socket: socket, data: data })
-                            .then(result => this.handleSuccessResult(result, action, socket, fn))
-                            .catch(error => this.handleFailResult(error, action, socket));
-                    });
+                    this.dispatchAction(action, socket);
+                    // socket.on(action.name, (data: any, fn: Function) => {
+                    //     this.handleAction(action, {socket: socket, data: data})
+                    //         .then(result => this.handleSuccessResult(result, action, socket, fn))
+                    //         .catch(error => this.handleFailResult(error, action, socket));
+                    // });
                 }
             });
         });
     }
 
+    private dispatchAction(action: ActionMetadata, socket: Socket) {
+        socket.on(action.name, (data: any, fn: Function) => {
+            this.handleAction(action, {socket: socket, data: data})
+                .then(result => this.handleSuccessResult(result, action, socket, fn))
+                .catch(error => this.handleFailResult(error, action, socket));
+        });
+    }
+
     private handleAction(action: ActionMetadata, options: { socket?: any, data?: any }): Promise<any> {
-        
+
         // compute all parameters
         const paramsPromises = action.params
             .sort((param1, param2) => param1.index - param2.index)
@@ -229,13 +239,14 @@ export class SocketControllerExecutor {
         } else if ((result === null || result === undefined) && clientCallback) {
             clientCallback("received");
         }
+        action.nextActions.forEach(act => this.dispatchAction(act, socket));
     }
 
     private handleFailResult(error: any, action: ActionMetadata, socket: any) {
         if (error !== null && error !== undefined && (action.emitOnFail || action.emitOnFailFor)) {
             const transformOptions = action.emitOnSuccess.classTransformOptions || this.classToPlainTransformOptions;
             let transformedResult = this.useClassTransformer && error instanceof Object ? classToPlain(error, transformOptions) : error;
-            
+
             if (action.emitOnFailFor && action.emitOnFailFor.errorType && this.errorMatchesType(action.emitOnFailFor.errorType, error)) {
                 socket.emit(action.emitOnFailFor.value, transformedResult);
             } else if (action.emitOnFail) {

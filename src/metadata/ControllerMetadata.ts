@@ -26,7 +26,7 @@ export class ControllerMetadata {
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
-    
+
     constructor(args: SocketControllerMetadataArgs) {
         this.target = args.target;
         this.namespace = args.namespace;
@@ -39,5 +39,8 @@ export class ControllerMetadata {
     get instance(): any {
         return getFromContainer(this.target);
     }
-    
+
+    get rootActions() {
+        return this.actions.filter(action => !action.after);
+    }
 }

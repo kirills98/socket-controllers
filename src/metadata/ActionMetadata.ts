@@ -47,16 +47,22 @@ export class ActionMetadata {
      */
     type: ActionType;
 
+    /**
+     * Action in which it will be triggered.
+     */
+    after?: string;
+
     // -------------------------------------------------------------------------
     // Public Methods
     // -------------------------------------------------------------------------
-    
+
     constructor(controllerMetadata: ControllerMetadata, args: ActionMetadataArgs) {
         this.controllerMetadata = controllerMetadata;
         this.name = args.name;
         this.target = args.target;
         this.method = args.method;
         this.type = args.type;
+        this.after = args.after;
     }
 
     // -------------------------------------------------------------------------
@@ -86,5 +92,9 @@ export class ActionMetadata {
     get skipEmitOnEmptyResult() {
         return this.results.find(resultHandler => resultHandler.type === ResultTypes.SKIP_EMIT_ON_EMPTY_RESULT);
     };
+
+    get nextActions() {
+        return this.controllerMetadata.actions.filter(action => action.after === this.name);
+    }
 
 }

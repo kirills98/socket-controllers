@@ -30,13 +30,14 @@ export function SocketController(namespace?: string) {
  */
 export {OnMessage as On};
 
-export function OnMessage(name?: string): Function {
+export function OnMessage(name?: string, after?: string): Function {
     return function (object: Object, methodName: string) {
         const metadata: ActionMetadataArgs = {
             name: name || methodName,
             target: object.constructor,
             method: methodName,
-            type: ActionTypes.MESSAGE
+            type: ActionTypes.MESSAGE,
+            after
         };
         defaultMetadataArgsStorage().actions.push(metadata);
     };
