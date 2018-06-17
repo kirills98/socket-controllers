@@ -126,6 +126,7 @@ export class SocketControllerExecutor {
     }
 
     private dispatchAction(action: ActionMetadata, socket: Socket) {
+        if (action.after && socket.listenerCount(action.name)) return;
         socket.on(action.name, (data: any, fn: Function) => {
             this.handleAction(action, {socket: socket, data: data})
                 .then(result => this.handleSuccessResult(result, action, socket, fn))
@@ -244,7 +245,7 @@ export class SocketControllerExecutor {
 
     private handleFailResult(error: any, action: ActionMetadata, socket: any) {
         if (error !== null && error !== undefined && (action.emitOnFail || action.emitOnFailFor)) {
-            const transformOptions = action.emitOnSuccess.classTransformOptions || this.classToPlainTransformOptions;
+            const transformOptions = action.emitOnFail.classTransformOptions || this.classToPlainTransformOptions;
             let transformedResult = this.useClassTransformer && error instanceof Object ? classToPlain(error, transformOptions) : error;
 
             if (action.emitOnFailFor && action.emitOnFailFor.errorType && this.errorMatchesType(action.emitOnFailFor.errorType, error)) {

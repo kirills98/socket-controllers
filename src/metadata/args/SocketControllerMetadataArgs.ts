@@ -12,5 +12,9 @@ export interface SocketControllerMetadataArgs {
      * Extra namespace in which this controller's events will be registered.
      */
     namespace?: string;
-    
+
+    /**
+     * Prefix for actions
+     */
+    prefix?: string;
 }

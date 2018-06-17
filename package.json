@@ -1,7 +1,7 @@
 {
   "name": "@kirills98/socket-controllers",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "Use class-based controllers to handle websocket events",
   "license": "MIT",
   "author": "Umed Khudoiberdiev <pleerock.me@gmail.com>",

@@ -14,15 +14,24 @@ import {ObjectType} from "./util/ObjectType";
  * Registers a class to be a socket controller that can listen to websocket events and respond to them.
  *
  * @param namespace Namespace in which this controller's events will be registered.
+ * @param prefix
  */
-export function SocketController(namespace?: string) {
+export function SocketController(namespace?: string, prefix?: string) {
     return function (object: Function) {
         const metadata: SocketControllerMetadataArgs = {
             namespace: namespace,
-            target: object
+            target: object,
+            prefix
         };
         defaultMetadataArgsStorage().controllers.push(metadata);
     };
+}
+
+/**
+ * Set prefix for all actions of controller.
+ */
+export function PrefixController(prefix: string) {
+    return SocketController(null, prefix);
 }
 
 /**
@@ -41,6 +50,10 @@ export function OnMessage(name?: string, after?: string): Function {
         };
         defaultMetadataArgsStorage().actions.push(metadata);
     };
+}
+
+export function After(after: string): Function {
+    return OnMessage(null, after);
 }
 
 /**

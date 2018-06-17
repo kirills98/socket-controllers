@@ -23,6 +23,11 @@ export class ControllerMetadata {
      */
     namespace: string;
 
+    /**
+     * Prefix for actions
+     */
+    prefix?: string;
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -30,6 +35,7 @@ export class ControllerMetadata {
     constructor(args: SocketControllerMetadataArgs) {
         this.target = args.target;
         this.namespace = args.namespace;
+        this.prefix = args.prefix;
     }
 
     // -------------------------------------------------------------------------

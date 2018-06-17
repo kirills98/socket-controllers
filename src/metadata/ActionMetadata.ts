@@ -58,7 +58,8 @@ export class ActionMetadata {
 
     constructor(controllerMetadata: ControllerMetadata, args: ActionMetadataArgs) {
         this.controllerMetadata = controllerMetadata;
-        this.name = args.name;
+        let prefix = controllerMetadata.prefix;
+        this.name = (prefix ? prefix + "." : "") + args.name;
         this.target = args.target;
         this.method = args.method;
         this.type = args.type;
